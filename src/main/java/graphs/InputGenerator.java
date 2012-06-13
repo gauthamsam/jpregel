@@ -1,22 +1,21 @@
-/*
- * @author Prakash Chandrasekaran
- * @author Gautham Narayanasamy
- * @author Vijayaraghavan Subbaiah
- */
 package graphs;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-import exceptions.PropertyNotFoundException;
-
 import utility.Props;
+import exceptions.PropertyNotFoundException;
 
 /**
  * Generates an adjacency list representing a graph based on the number of
  * vertices and the range of weights to be assigned to the edges.
+ * 
+ * @author Prakash Chandrasekaran
+ * @author Gautham Narayanasamy
+ * @author Vijayaraghavan Subbaiah
  */
 public class InputGenerator {
 
@@ -61,6 +60,11 @@ public class InputGenerator {
 	 */
 	private void setWriter() {
 		try {
+			File file = new File(outputFilePath.substring(0,
+					outputFilePath.lastIndexOf(File.separator)));
+			if (!file.exists()) {
+				file.mkdirs();
+			}
 			writer = new BufferedWriter(new FileWriter(outputFilePath));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -107,14 +111,17 @@ public class InputGenerator {
 		adjacencyList.append(lineSeparator);
 
 		for (int vertexId = 0; vertexId < numVertices; vertexId++) {
-			int rightVertexId = (vertexId % squareRoot != 0) ? (vertexId + 1)
+			int rightVertexId = ((vertexId + 1) % squareRoot != 0) ? (vertexId + 1)
 					: 0;
-			int topVertexId = ((vertexId + squareRoot) <= numVertices) ? (vertexId + squareRoot)
+
+			int topVertexId = ((vertexId + 1 + squareRoot) <= numVertices) ? (vertexId + squareRoot)
 					: 0;
+			// System.out.println("vertexId: " + vertexId + " rightvertexId: " +
+			// rightVertexId + " topVertexId: " + topVertexId);
 			adjacencyList.append(vertexId).append(vertexListSeparator);
 
 			// if the right vertex exists, add it to the adjacency list
-			if (rightVertexId != 0) {
+			if (rightVertexId != 0 && rightVertexId < numVertices) {
 				double weight = minEdgeWeight + (maxEdgeWeight - minEdgeWeight)
 						* random.nextDouble();
 				adjacencyList.append(rightVertexId)
@@ -122,7 +129,7 @@ public class InputGenerator {
 			}
 
 			// if the top vertex exists, add it to the adjacency list
-			if (topVertexId != 0) {
+			if (topVertexId != 0 && topVertexId < numVertices) {
 				if (rightVertexId != 0) {
 					adjacencyList.append(listVertexSeparator);
 				}
@@ -135,14 +142,12 @@ public class InputGenerator {
 
 			// append the content to the file in batches.
 			if (vertexId % inputBufferSize == 0) {
-				System.out.println("Flushing to file");
 				// Write the graph input to the output file path
 				writeToFile(adjacencyList.toString());
 				adjacencyList = new StringBuilder();
 			}
 		}
 		if (adjacencyList.length() > 0) {
-			System.out.println("Writing the remaining content to file");
 			// Write the graph input to the output file path
 			writeToFile(adjacencyList.toString());
 		}
@@ -173,10 +178,10 @@ public class InputGenerator {
 	 *             the exception
 	 */
 	public static void main(String[] args) throws Exception {
-		int numVertices = 16;// Integer.parseInt(args[0]);
+		int numVertices = 100;// Integer.parseInt(args[0]);
 		double minEdgeWeight = 1;// Double.parseDouble(args[1]);
 		double maxEdgeWeight = 1;// Double.parseDouble(args[2]);
-		String outputFilePath = "/storage/shelf2/ucsb/cs290b/output.txt";
+		String outputFilePath = "input/input.txt";
 
 		InputGenerator inputGenerator = new InputGenerator(numVertices,
 				minEdgeWeight, maxEdgeWeight, outputFilePath);
